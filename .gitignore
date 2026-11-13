@@ -1,0 +1,26 @@
+# Secretos — NUNCA subir a GitHub
+.env
+
+# Base de datos local
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Knowledge: se versiona (el agente lo necesita en Railway).
+# Si tienes archivos privados que no quieres subir, agrégalos aquí.
+
+# Nota: agent/, config/, tests/, requirements.txt y Dockerfile SÍ se suben,
+# porque Railway construye el agente desde este repositorio.
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+node_modules/
