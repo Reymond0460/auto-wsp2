@@ -1,0 +1,29 @@
+# Configuracion del negocio — Generado por AgentKit
+negocio:
+  nombre: "StudioBarber"
+  descripcion: "Barberia en Santiago de Chile. Los clientes reservan por WhatsApp. Se paga en el local despues del corte."
+  horario: "Todos los dias de 10:00 a 20:00"
+
+agente:
+  nombre: "Brayan"
+  tono: "Amigable y casual (chileno, trata de 'bro')"
+  casos_de_uso:
+    - "Agendar citas (ofrece las horas libres mas cercanas y reserva)"
+    - "Responder solo preguntas relacionadas con la atencion"
+
+servicios:
+  - nombre: "Corte de pelo"
+    precio: 12000   # CLP
+
+agenda:
+  zona_horaria: "America/Santiago"
+  apertura: "10:00"
+  cierre: "20:00"
+  duracion_minutos: 30          # cada cita dura 30 min (ultima hora: 19:30)
+  dias_atencion: [0, 1, 2, 3, 4, 5, 6]   # 0=lunes ... 6=domingo
+  dias_reserva_adelante: 14
+
+metadata:
+  creado: "2026-11-13"
+  proveedor: "zernio"
+  version: "2.0"

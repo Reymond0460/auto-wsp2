@@ -13,6 +13,9 @@ import yaml
 from anthropic import AsyncAnthropic
 from dotenv import load_dotenv
 
+from agent import tools as herramientas
+from agent.agenda import ahora_local
+
 load_dotenv()
 logger = logging.getLogger("agentkit")
 
@@ -98,7 +101,13 @@ def _es_error_de_esfuerzo(error: Exception) -> bool:
     return "output_config" in texto or "effort" in texto
 
 
-async def generar_respuesta(mensaje: str, historial: list[dict]) -> tuple[str, bool]:
+DIAS = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"]
+MAX_VUELTAS_HERRAMIENTAS = 6
+
+
+async def generar_respuesta(
+    mensaje: str, historial: list[dict], telefono: str = "desconocido"
+) -> tuple[str, bool]:
     """
     Genera una respuesta con Claude.
 
@@ -122,8 +131,12 @@ async def generar_respuesta(mensaje: str, historial: list[dict]) -> tuple[str, b
     mensajes = [{"role": m["role"], "content": m["content"]} for m in historial]
     mensajes.append({"role": "user", "content": mensaje})
 
-    system_prompt = cargar_system_prompt()
-    extras = {"output_config": {"effort": ESFUERZO}} if (_soporta_esfuerzo and ESFUERZO) else {}
+    # El modelo no sabe que dia es: se lo decimos en cada llamada (hora de Chile)
+    hoy = ahora_local()
+    system_prompt = cargar_system_prompt() + (
+        f"\n\n## Fecha y hora actual\nHoy es {DIAS[hoy.weekday()]} {hoy:%Y-%m-%d}, "
+        f"son las {hoy:%H:%M} (hora de Chile)."
+    )
 
     async def _llamar(parametros_extra: dict):
         return await client.messages.create(
@@ -131,25 +144,42 @@ async def generar_respuesta(mensaje: str, historial: list[dict]) -> tuple[str, b
             max_tokens=MAX_TOKENS,
             system=system_prompt,
             messages=mensajes,
+            tools=herramientas.DEFINICIONES,
             **parametros_extra,
         )
 
+    async def _llamar_seguro():
+        global _soporta_esfuerzo
+        extras = {"output_config": {"effort": ESFUERZO}} if (_soporta_esfuerzo and ESFUERZO) else {}
+        try:
+            return await _llamar(extras)
+        except Exception as e:  # noqa: BLE001
+            if extras and _es_error_de_esfuerzo(e):
+                logger.warning(
+                    f"El modelo {MODELO} no acepta output_config.effort; se reintenta sin ese parametro."
+                )
+                _soporta_esfuerzo = False
+                return await _llamar({})
+            raise
+
+    # Ciclo de tool use: Claude pide herramientas (ver horas, reservar...) hasta que contesta
     try:
-        respuesta = await _llamar(extras)
+        for _ in range(MAX_VUELTAS_HERRAMIENTAS):
+            respuesta = await _llamar_seguro()
+            if respuesta.stop_reason != "tool_use":
+                break
+            mensajes.append({"role": "assistant", "content": respuesta.content})
+            resultados = []
+            for bloque in respuesta.content:
+                if bloque.type == "tool_use":
+                    salida = await herramientas.ejecutar(bloque.name, bloque.input or {}, telefono)
+                    resultados.append(
+                        {"type": "tool_result", "tool_use_id": bloque.id, "content": salida}
+                    )
+            mensajes.append({"role": "user", "content": resultados})
     except Exception as e:  # noqa: BLE001
-        if extras and _es_error_de_esfuerzo(e):
-            logger.warning(
-                f"El modelo {MODELO} no acepta output_config.effort; se reintenta sin ese parametro."
-            )
-            _soporta_esfuerzo = False
-            try:
-                respuesta = await _llamar({})
-            except Exception as e2:  # noqa: BLE001
-                logger.error(f"Error llamando a Claude: {e2}")
-                return obtener_mensaje_error(), False
-        else:
-            logger.error(f"Error llamando a Claude: {e}")
-            return obtener_mensaje_error(), False
+        logger.error(f"Error llamando a Claude: {e}")
+        return obtener_mensaje_error(), False
 
     if getattr(respuesta, "stop_reason", None) == "max_tokens":
         logger.warning(

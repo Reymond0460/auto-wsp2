@@ -1,93 +1,77 @@
-# agent/tools.py — Herramientas del agente
-# Generado por AgentKit
-
+# agent/tools.py — Herramientas que Claude puede ejecutar (tool use)
 """
-Herramientas especificas del negocio.
-
-OJO: estas funciones NO se ejecutan solas todavia. La informacion del negocio le llega
-al agente por el system prompt (config/prompts.yaml), asi que para CONTESTAR preguntas
-no hace falta nada de aca. Este archivo es el lugar para las ACCIONES —reservar, cobrar,
-abrir un ticket— y conectarlas al ciclo de tool use de Claude es un paso aparte.
-
-Claude Code genera las funciones segun los casos de uso elegidos en la entrevista.
+Aqui se definen las ACCIONES del agente y se conectan al ciclo de tool use de Claude
+(ver brain.py). El agente NUNCA confirma una hora sin que reservar_cita devuelva ok.
 """
 
+import json
 import logging
-from pathlib import Path
 
-import yaml
+from agent import agenda
 
 logger = logging.getLogger("agentkit")
 
-CARPETA_KNOWLEDGE = Path("knowledge")
+DEFINICIONES = [
+    {
+        "name": "horas_disponibles",
+        "description": (
+            "Devuelve las horas libres mas cercanas para un corte. Usala SIEMPRE antes de "
+            "ofrecer horas: nunca inventes horarios. Si el dia pedido esta lleno, devuelve "
+            "el siguiente dia con horas libres (revisa el campo fecha)."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "fecha": {"type": "string", "description": "YYYY-MM-DD. Omitir = hoy."},
+                "desde": {"type": "string", "description": "HH:MM, hora preferida del cliente. Omitir = lo mas pronto posible."},
+            },
+        },
+    },
+    {
+        "name": "reservar_cita",
+        "description": "Reserva la hora que el cliente eligio. Solo confirma la cita si devuelve ok=true.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "nombre": {"type": "string", "description": "Nombre del cliente"},
+                "fecha": {"type": "string", "description": "YYYY-MM-DD"},
+                "hora": {"type": "string", "description": "HH:MM"},
+            },
+            "required": ["nombre", "fecha", "hora"],
+        },
+    },
+    {
+        "name": "mis_citas",
+        "description": "Lista las citas futuras del cliente que esta escribiendo.",
+        "input_schema": {"type": "object", "properties": {}},
+    },
+    {
+        "name": "cancelar_cita",
+        "description": "Cancela una cita del cliente que esta escribiendo.",
+        "input_schema": {
+            "type": "object",
+            "properties": {"fecha": {"type": "string"}, "hora": {"type": "string"}},
+            "required": ["fecha", "hora"],
+        },
+    },
+]
 
 
-def cargar_info_negocio() -> dict:
-    """Carga la informacion del negocio desde config/business.yaml."""
+async def ejecutar(nombre: str, args: dict, telefono: str) -> str:
+    """Ejecuta una herramienta y devuelve el resultado como JSON (texto para Claude)."""
     try:
-        with open("config/business.yaml", "r", encoding="utf-8") as f:
-            return yaml.safe_load(f) or {}
-    except FileNotFoundError:
-        logger.error("config/business.yaml no encontrado")
-        return {}
-
-
-def obtener_horario() -> dict:
-    """Retorna el horario de atencion del negocio."""
-    info = cargar_info_negocio()
-    return {
-        "horario": info.get("negocio", {}).get("horario", "No disponible"),
-        "esta_abierto": True,  # TODO: calcular segun la hora actual y el horario
-    }
-
-
-def buscar_en_knowledge(consulta: str) -> str:
-    """
-    Busca informacion en los archivos de /knowledge.
-    Retorna los fragmentos que coinciden con la consulta.
-    """
-    if not CARPETA_KNOWLEDGE.is_dir():
-        return "No hay archivos de conocimiento disponibles."
-
-    resultados = []
-    for ruta in sorted(CARPETA_KNOWLEDGE.iterdir()):
-        if ruta.name.startswith(".") or not ruta.is_file():
-            continue
-        try:
-            contenido = ruta.read_text(encoding="utf-8")
-        except (UnicodeDecodeError, OSError):
-            continue  # binarios y archivos ilegibles se saltean
-        if consulta.lower() in contenido.lower():
-            resultados.append(f"[{ruta.name}]: {contenido[:500]}")
-
-    if resultados:
-        return "\n---\n".join(resultados)
-    return "No encontre informacion especifica sobre eso en mis archivos."
-
-
-# ════════════════════════════════════════════════════════════
-# Claude Code: agrega aqui las funciones especificas segun
-# el caso de uso elegido por el usuario. Ejemplos:
-#
-# Si FAQ -> buscar_en_knowledge() ya esta listo arriba
-#
-# Si AGENDAR CITAS:
-# def obtener_slots_disponibles(fecha: str) -> list[dict]: ...
-# def reservar_cita(telefono, fecha, hora, servicio): ...
-# def cancelar_cita(telefono, cita_id): ...
-#
-# Si TOMAR PEDIDOS:
-# def agregar_al_carrito(telefono, producto, cantidad): ...
-# def ver_carrito(telefono) -> list[dict]: ...
-# def confirmar_pedido(telefono) -> dict: ...
-#
-# Si VENTAS / LEADS:
-# def registrar_lead(telefono, nombre, interes): ...
-# def calificar_lead(telefono) -> str: ...
-# def escalar_a_vendedor(telefono, contexto): ...
-#
-# Si SOPORTE:
-# def crear_ticket(telefono, problema) -> str: ...
-# def consultar_ticket(ticket_id) -> dict: ...
-# def escalar_ticket(ticket_id, razon): ...
-# ════════════════════════════════════════════════════════════
+        if nombre == "horas_disponibles":
+            r = await agenda.horas_disponibles(args.get("fecha"), args.get("desde"))
+        elif nombre == "reservar_cita":
+            r = await agenda.reservar_cita(telefono, args["nombre"], args["fecha"], args["hora"])
+        elif nombre == "mis_citas":
+            r = await agenda.mis_citas(telefono)
+        elif nombre == "cancelar_cita":
+            r = await agenda.cancelar_cita(telefono, args["fecha"], args["hora"])
+        else:
+            r = {"error": f"Herramienta desconocida: {nombre}"}
+    except Exception as e:  # noqa: BLE001
+        logger.exception(f"Fallo la herramienta {nombre}")
+        r = {"ok": False, "error": f"Error interno: {e}"}
+    logger.info(f"Herramienta {nombre}({args}) -> {r}")
+    return json.dumps(r, ensure_ascii=False)
