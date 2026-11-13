@@ -12,8 +12,6 @@ __pycache__/
 .venv/
 venv/
 
-# Knowledge: se versiona (el agente lo necesita en Railway).
-# Si tienes archivos privados que no quieres subir, agrégalos aquí.
 
 # Nota: agent/, config/, tests/, requirements.txt y Dockerfile SÍ se suben,
 # porque Railway construye el agente desde este repositorio.
@@ -24,3 +22,8 @@ Thumbs.db
 .vscode/
 .idea/
 node_modules/
+
+# Knowledge (archivos privados del negocio; su contenido se copia a config/prompts.yaml)
+knowledge/*
+!knowledge/.gitkeep
+config/session.yaml
