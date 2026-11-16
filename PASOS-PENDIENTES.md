@@ -2,12 +2,10 @@
 
 El agente "Brayan" ya está programado. Falta conectarlo (≈ 20 min).
 
-## 1. Zernio (WhatsApp)
-1. Crear cuenta gratis en zernio.com (sin tarjeta).
-2. Settings → API Keys → Create API Key. Copiarla (solo se muestra una vez, empieza con `sk_`).
-3. Si no tienes número de WhatsApp Business, activa el número de prueba (sandbox) para +56940916058.
-   Claude lo puede hacer por ti con la API key (50 mensajes/día, dura 7 días).
-4. Inventa un "webhook secret" (cualquier texto largo y secreto).
+## 1. Zernio (WhatsApp) — LISTO
+- Número +56 9 4091 6058 ("Brayan") conectado en modo coexistencia (sigues usando la app de WhatsApp Business).
+- `ZERNIO_ACCOUNT_ID` = `6afb5a014bf0600df76b2350`
+- Falta: inventar un "webhook secret" (texto largo y secreto) y guardarlo para Railway.
 
 ## 2. Railway
 1. railway.com → New Project → Deploy from GitHub repo → `auto-wsp2`
@@ -22,6 +20,7 @@ El agente "Brayan" ya está programado. Falta conectarlo (≈ 20 min).
 | WHATSAPP_PROVIDER | `zernio` |
 | ZERNIO_API_KEY | tu clave `sk_...` |
 | ZERNIO_WEBHOOK_SECRET | tu secreto inventado |
+| ZERNIO_ACCOUNT_ID | `6afb5a014bf0600df76b2350` |
 | ENVIRONMENT | `production` |
 | DATABASE_URL | `${{Postgres.DATABASE_URL}}` (literal, con llaves) |
 
