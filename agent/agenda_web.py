@@ -168,6 +168,17 @@ def _telefono_web(telefono: str) -> str:
     return "+" + d if d.startswith("569") and len(d) == 11 else telefono
 
 
+async def verificar_conexion() -> tuple[bool, str]:
+    """Lee el horario y los servicios de la web para confirmar que las credenciales sirven."""
+    try:
+        db = _cliente()
+        await db.collection("settings").document("sitio").get()
+        svc = await _servicio()
+        return True, f"Firestore {db.project} conectado (servicio: {svc['name']} ${svc['price']})"
+    except Exception as e:  # noqa: BLE001
+        return False, f"No se pudo conectar a Firestore: {type(e).__name__}: {str(e)[:200]}"
+
+
 # ── Lo que usan las herramientas de Claude ─────────────────────────────
 
 async def horas_disponibles(fecha: str | None = None, desde: str | None = None, cantidad: int = 3) -> dict:

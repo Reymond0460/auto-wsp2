@@ -84,6 +84,7 @@ except Exception as e:  # noqa: BLE001 — cualquier problema de configuracion
 # Resultado del chequeo de credenciales que se hace al arrancar. Se expone en el health
 # check: que el servidor conteste no significa que el agente pueda responder por WhatsApp.
 estado_proveedor: dict = {"ok": None, "detalle": "sin verificar"}
+estado_agenda: dict = {"ok": None, "detalle": "sin verificar"}
 
 
 @asynccontextmanager
@@ -102,6 +103,15 @@ async def lifespan(app: FastAPI):
         logger.info(f"Conexion con el proveedor: {'OK' if ok else 'ERROR'} — {detalle}")
     else:
         logger.error(f"Proveedor de WhatsApp NO configurado: {error_configuracion}")
+
+    global estado_agenda
+    from agent import agenda_web
+    if agenda_web.activa():
+        ok, detalle = await agenda_web.verificar_conexion()
+        estado_agenda = {"ok": ok, "tipo": "web (Firestore)", "detalle": detalle}
+    else:
+        estado_agenda = {"ok": True, "tipo": "local", "detalle": "FIREBASE_CREDENCIALES no configurada"}
+    logger.info(f"Agenda: {estado_agenda}")
 
     yield
 
@@ -122,6 +132,7 @@ async def health_check():
         "service": "agentkit",
         "proveedor": proveedor.__class__.__name__ if proveedor else None,
         "conexion": estado_proveedor,
+        "agenda": estado_agenda,
     }
 
 
