@@ -45,6 +45,28 @@ logger.setLevel(logging.DEBUG if ENVIRONMENT == "development" else logging.INFO)
 
 PORT = int(os.getenv("PORT", "8000"))
 
+
+def _lista_numeros(variable: str) -> set[str]:
+    """Lee una lista de numeros separados por coma; deja solo los digitos."""
+    return {
+        "".join(c for c in n if c.isdigit())
+        for n in os.getenv(variable, "").split(",")
+        if any(c.isdigit() for c in n)
+    }
+
+
+# NUMEROS_PERMITIDOS: si tiene algo, el agente SOLO contesta a esos numeros (modo demo).
+# NUMEROS_IGNORADOS: numeros a los que el agente nunca contesta (familia, amigos...).
+NUMEROS_PERMITIDOS = _lista_numeros("NUMEROS_PERMITIDOS")
+NUMEROS_IGNORADOS = _lista_numeros("NUMEROS_IGNORADOS")
+
+
+def numero_atendido(telefono: str) -> bool:
+    digitos = "".join(c for c in telefono if c.isdigit())
+    if digitos in NUMEROS_IGNORADOS:
+        return False
+    return not NUMEROS_PERMITIDOS or digitos in NUMEROS_PERMITIDOS
+
 # Un candado por numero de telefono. En WhatsApp es normal que alguien mande "hola" y
 # medio segundo despues la pregunta de verdad: sin esto los dos mensajes se procesarian
 # en paralelo, los dos leerian el mismo historial y las escrituras quedarian intercaladas.
@@ -149,6 +171,11 @@ async def webhook_handler(request: Request, tareas: BackgroundTasks):
     encolados = 0
     for msg in mensajes:
         if msg.es_propio or not msg.texto.strip():
+            continue
+
+        # El numero es personal (modo coexistencia): no contestarle a cualquiera
+        if not numero_atendido(msg.telefono):
+            logger.info(f"Numero no atendido por el agente, se ignora: {msg.telefono}")
             continue
 
         # La entrega es "al menos una vez": el mismo evento puede llegar dos veces
