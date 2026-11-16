@@ -14,7 +14,6 @@ from anthropic import AsyncAnthropic
 from dotenv import load_dotenv
 
 from agent import tools as herramientas
-from agent.agenda import ahora_local
 
 load_dotenv()
 logger = logging.getLogger("agentkit")
@@ -132,7 +131,7 @@ async def generar_respuesta(
     mensajes.append({"role": "user", "content": mensaje})
 
     # El modelo no sabe que dia es: se lo decimos en cada llamada (hora de Chile)
-    hoy = ahora_local()
+    hoy = herramientas.agenda.ahora_local()
     system_prompt = cargar_system_prompt() + (
         f"\n\n## Fecha y hora actual\nHoy es {DIAS[hoy.weekday()]} {hoy:%Y-%m-%d}, "
         f"son las {hoy:%H:%M} (hora de Chile)."

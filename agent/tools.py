@@ -7,7 +7,14 @@ Aqui se definen las ACCIONES del agente y se conectan al ciclo de tool use de Cl
 import json
 import logging
 
-from agent import agenda
+from agent import agenda_web
+
+# Si hay credenciales de Firebase, se usa la agenda de la pagina web (compartida).
+# Si no, la agenda local de la base del agente (sirve para probar sin Firebase).
+if agenda_web.activa():
+    agenda = agenda_web
+else:
+    from agent import agenda
 
 logger = logging.getLogger("agentkit")
 
@@ -15,9 +22,10 @@ DEFINICIONES = [
     {
         "name": "horas_disponibles",
         "description": (
-            "Devuelve las horas libres mas cercanas para un corte. Usala SIEMPRE antes de "
-            "ofrecer horas: nunca inventes horarios. Si el dia pedido esta lleno, devuelve "
-            "el siguiente dia con horas libres (revisa el campo fecha)."
+            "Devuelve las horas libres mas cercanas, el servicio y su precio. Usala SIEMPRE antes de "
+            "ofrecer horas o dar el precio: nunca inventes horarios. Si el dia pedido esta lleno, "
+            "devuelve el siguiente dia con horas libres (revisa el campo fecha). "
+            "hora_pedida_libre dice si la hora exacta que pidio el cliente esta libre."
         ),
         "input_schema": {
             "type": "object",
@@ -45,7 +53,12 @@ DEFINICIONES = [
         "description": "Lista las citas futuras del cliente que esta escribiendo.",
         "input_schema": {"type": "object", "properties": {}},
     },
-    {
+]
+
+# Cancelar solo existe en la agenda local: en la web, las cancelaciones las hace el barbero
+# desde el panel de administracion.
+if agenda is not agenda_web:
+    DEFINICIONES.append({
         "name": "cancelar_cita",
         "description": "Cancela una cita del cliente que esta escribiendo.",
         "input_schema": {
@@ -53,8 +66,7 @@ DEFINICIONES = [
             "properties": {"fecha": {"type": "string"}, "hora": {"type": "string"}},
             "required": ["fecha", "hora"],
         },
-    },
-]
+    })
 
 
 async def ejecutar(nombre: str, args: dict, telefono: str) -> str:
