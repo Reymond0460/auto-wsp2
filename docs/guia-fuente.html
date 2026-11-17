@@ -72,7 +72,7 @@ ol,ul{padding-left:20px;margin:6px 0}li{margin:3px 0}
   </div>
   <div>
     <div class="meta">
-      <div class="box"><b>~US$6–8 / mes</b><span>costo estimado por cliente pequeño</span></div>
+      <div class="box"><b>~$7.000–10.000 CLP</b><span>al mes por cliente pequeño (US$6–8)</span></div>
       <div class="box"><b>26 / 26</b><span>pruebas automáticas de QA aprobadas</span></div>
       <div class="box"><b>~45 min</b><span>para montarlo con esta guía</span></div>
     </div>
@@ -125,16 +125,22 @@ ol,ul{padding-left:20px;margin:6px 0}li{margin:3px 0}
   <p class="lead">Precios vigentes a noviembre de 2026. Confirmarlos en cada sitio antes de cotizar.</p>
   <table>
     <tr><th>Herramienta</th><th>Para qué</th><th>Plan / precio</th><th>¿Pago?</th></tr>
-    <tr><td><b>Anthropic (Claude API)</b><br><small>platform.claude.com</small></td><td>La IA que conversa</td><td>Prepago por uso (se cargan créditos, ej. US$5).<br><b>Haiku 5.5:</b> ~US$0,002 por conversación (≈ US$2 / 1.000).<br>Sonnet 5.5: ~US$0,04 (≈ US$44 / 1.000).<br>Opus 5.5: ~US$0,09.</td><td><span class="chip warn">Sí, por uso</span></td></tr>
-    <tr><td><b>Railway</b><br><small>railway.com</small></td><td>Servidor del agente + base PostgreSQL</td><td>Trial: US$5 una vez (30 días).<br><b>Hobby: US$5/mes</b> (incluye US$5 de uso).<br>Ojo: la base de datos cuenta como segundo servicio siempre encendido.</td><td><span class="chip warn">Sí, mensual</span></td></tr>
+    <tr><td><b>Anthropic (Claude API)</b><br><small>platform.claude.com</small></td><td>La IA que conversa</td><td>Prepago por uso: se cargan créditos (mín. US$5 ≈ $6.000 CLP). No es mensual: se van gastando.<br><b>Haiku 5.5:</b> ~US$0,002 por conversación (≈ US$2 / 1.000).<br>Sonnet 5.5: ~US$0,04 (≈ US$44 / 1.000).<br>Opus 5.5: ~US$0,09.</td><td><span class="chip warn">Sí, por uso</span></td></tr>
+    <tr><td><b>Railway</b><br><small>railway.com</small></td><td>Servidor del agente + base PostgreSQL</td><td><b>Primeros 30 días gratis</b> (Trial: US$5 de crédito, sin tarjeta).<br>Luego <b>Hobby: US$5/mes ≈ $6.000 CLP</b> (incluye US$5 de uso).<br>El plan Free (US$1/mes) no alcanza para agente + base de datos.<br>Ojo: la base de datos cuenta como segundo servicio siempre encendido.</td><td><span class="chip warn">Sí, mensual</span></td></tr>
     <tr><td><b>Zernio</b><br><small>zernio.com</small></td><td>Conecta el WhatsApp del cliente sin app de Facebook</td><td>Primeras 2 cuentas conectadas <b>gratis</b>, sin tarjeta.<br>Número dedicado nuevo: desde ~US$3/mes (si el cliente no usa el suyo).</td><td><span class="chip ok">Gratis*</span></td></tr>
     <tr><td><b>Meta (WhatsApp Cloud API)</b></td><td>Cobro de Meta por mensajes</td><td>Desde el 1-oct-2026 se cobra por mensaje de servicio entregado; <b>los primeros 1.000 al mes por número son gratis</b>. Las plantillas (escribir primero) se cobran aparte por país.</td><td><span class="chip ok">Gratis hasta 1.000</span></td></tr>
     <tr><td><b>Firebase (Firestore + Hosting)</b></td><td>Web, panel y agenda compartida</td><td>Plan Spark gratuito (cuotas diarias amplias para un negocio pequeño).</td><td><span class="chip ok">Gratis</span></td></tr>
     <tr><td><b>GitHub</b></td><td>Código de agente y web</td><td>Repositorios privados gratis.</td><td><span class="chip ok">Gratis</span></td></tr>
   </table>
-  <div class="total"><div>Costo mensual estimado · negocio pequeño (≤300 conversaciones/mes, Haiku)<br><small style="color:#c9d6f0">Railway Hobby US$5 + Anthropic ~US$1–3 + Zernio/Meta/Firebase US$0</small></div><b>US$6–8</b></div>
-  <div class="note"><b>Cómo bajar el costo:</b> lo que más pesa es el texto que se envía a la IA en cada mensaje (instrucciones + historial). Quitar del prompt lo que los clientes no preguntan rinde más que cambiar de modelo. Configurar un <b>límite de gasto mensual</b> en Anthropic (Settings → Limits).</div>
-  <div class="note warn"><b>Meta «pago bloqueado»:</b> si la cuenta de WhatsApp no tiene método de pago, Meta bloquea solo las conversaciones que inicia el negocio. El agente responde a quien escribe, así que funciona igual.</div>
+  <div class="total"><div>Costo mensual estimado · negocio pequeño (≤300 conversaciones/mes, Haiku)<br><small style="color:#c9d6f0">Railway Hobby US$5 + Anthropic ~US$1–3 + Zernio/Meta/Firebase US$0</small></div><b style="white-space:nowrap;text-align:right">US$6–8<br><small style="font-size:10pt;font-weight:600">≈ $7.000–10.000 CLP</small></b></div>
+  <table>
+    <tr><th>Concepto</th><th>Inicio</th><th>Mensual</th><th>En pesos (CLP, con IVA)</th></tr>
+    <tr><td>Railway</td><td>Gratis 30 días</td><td>US$5</td><td>≈ $6.000</td></tr>
+    <tr><td>Anthropic (Haiku)</td><td>Carga inicial US$5</td><td>~US$1–3 según uso</td><td>carga ≈ $6.000 · uso ≈ $1.000–3.500</td></tr>
+    <tr><td>Zernio · Meta (≤1.000 msjs) · Firebase · GitHub</td><td>Gratis</td><td>US$0</td><td>$0</td></tr>
+    <tr><td><b>Total</b></td><td><b>≈ $6.000 (solo Anthropic)</b></td><td><b>US$6–8</b></td><td><b>≈ $7.000–10.000 / mes</b></td></tr>
+  </table>
+  <p class="note">Montos en pesos aproximados: dólar ≈ $950–1.000 más IVA del 19% que se cobra en Chile a servicios digitales (por eso US$5 ≈ $6.000 en la tarjeta). Confirmar el dólar del día al cotizar. Para controlar el gasto: límite mensual en Anthropic (Settings → Limits) y un prompt corto (es lo que más pesa).</p>
 </section>
 
 <!-- 4 DATOS -->
@@ -264,6 +270,7 @@ Las claves NO las pego en el chat: van directo a Railway.</pre>
     <tr><td>Panel no muestra la reserva de mañana</td><td>Solo tenía «Agenda de hoy». Se agregó «Próximas reservas».</td></tr>
     <tr><td>Git: «detected dubious ownership»</td><td>Carpeta en otro disco (D:). <code>git config --global --add safe.directory &lt;ruta&gt;</code>.</td></tr>
     <tr><td>La demo guardaba reservas solo en el navegador</td><td><code>MODO_DEMO</code> sin Firebase. <code>crear-demo.js</code> ahora usa <code>CON_FIREBASE = true</code>.</td></tr>
+    <tr><td>Meta muestra «pago bloqueado»</td><td>Sin método de pago Meta bloquea solo las conversaciones que inicia el negocio. El agente responde a quien escribe: funciona igual.</td></tr>
     <tr><td>Clave de API escrita en un chat de WhatsApp</td><td>Borrarla y rotarla. Las claves solo viven en Railway.</td></tr>
   </table>
   <h3>Seguridad</h3>
