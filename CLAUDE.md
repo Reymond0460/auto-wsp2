@@ -2153,3 +2153,13 @@ ENVIRONMENT=development             # development | production
 DATABASE_URL=sqlite+aiosqlite:///./agentkit.db   # local
 # DATABASE_URL=postgresql+asyncpg://...          # produccion Railway
 ```
+
+---
+
+## 9. Reglas fijas de TiforTi (aprendidas en StudioBarber)
+
+- **Reglas de Firestore SIEMPRE actualizadas.** `firestore.rules` del repo de la web es la fuente única; se publica
+  siempre junto con la web (`firebase deploy --only hosting,firestore:rules ...`). Después de cada deploy correr
+  `python tests/test_produccion.py` y no dar nada por terminado si falla.
+- Antes de entregar: `python tests/test_qa.py` (todo OK) + 3 conversaciones reales (pedir hora, hora ocupada, fuera de tema).
+- Guía completa para replicar: `docs/Guia-Automatizacion-WhatsApp-TiforTi.pdf`.

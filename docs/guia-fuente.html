@@ -35,10 +35,10 @@ section.nob{break-before:auto;margin-top:14px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.s1 .card{margin:0;padding:10px 14px}.s1 .card p{margin:4px 0 0}
 .chip{display:inline-block;background:var(--pale);color:var(--blue);border-radius:99px;padding:2px 10px;font-size:8.5pt;font-weight:700}
 .chip.ok{background:#dcfce7;color:var(--ok)}.chip.err{background:#fee2e2;color:var(--err)}.chip.warn{background:#fef3c7;color:var(--warn)}
-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:9.3pt;break-inside:auto}
+table{width:100%;border-collapse:collapse;margin:6px 0;font-size:8.7pt;line-height:1.4;break-inside:auto}
 th{background:var(--navy);color:#fff;text-align:left;font-weight:700;padding:7px 9px}
 th:first-child{border-top-left-radius:8px}th:last-child{border-top-right-radius:8px}
-td{border-bottom:1px solid var(--line);padding:6px 9px;vertical-align:top}
+td{border-bottom:1px solid var(--line);padding:4px 8px;vertical-align:top}
 tr{break-inside:avoid}
 tr:nth-child(even) td{background:var(--soft)}
 code{font-family:ui-monospace,Consolas,monospace;font-size:8.8pt;background:var(--pale);color:var(--deep);border-radius:5px;padding:1px 5px}
@@ -174,7 +174,7 @@ Las claves NO las pego en el chat: van directo a Railway.</pre>
     <li>Escribir <code>config/prompts.yaml</code> con identidad, tono y mensajes clave; ajustar <code>config/business.yaml</code>.</li>
     <li>Si la web tiene otra estructura de datos, adaptar <code>agent/agenda_web.py</code> (copia las reglas de <code>js/data.js</code>).</li>
     <li>En la web: <code>scripts/crear-demo.js</code> con <code>CON_FIREBASE = true</code> y la sección «Próximas reservas» del panel.</li>
-    <li>Correr <code>python tests/test_qa.py</code> (debe dar 26/26).</li>
+    <li>Correr <code>python tests/test_qa.py</code> (26/26) y, tras publicar, <code>python tests/test_produccion.py</code> (agente + reglas de Firestore).</li>
   </ol>
   <h3>B · Anthropic 👤</h3>
   <ol><li>platform.claude.com → Settings → API Keys → Crear clave → opción «En otro lugar».</li>
@@ -191,8 +191,8 @@ Las claves NO las pego en el chat: van directo a Railway.</pre>
   <h3>E · Webhook y Firebase 👤</h3>
   <ol><li>Zernio → Webhooks → URL <code>https://&lt;app&gt;.up.railway.app/webhook</code>, mismo secret, evento <code>message.received</code>.</li>
   <li>Firebase → Configuración → Cuentas de servicio → <b>Generar clave privada</b> → pegar el JSON completo en <code>FIREBASE_CREDENCIALES</code>.</li>
-  <li>Firestore → Reglas: pegar <code>firestore.rules</code> del repo y <b>Publicar</b> (incluye <code>settings</code> y los correos admin).</li>
-  <li>Publicar la web: <code>node scripts/crear-demo.js</code> y <code>firebase deploy --only hosting --config firebase.demo.json --project &lt;proyecto&gt;</code>.</li></ol>
+  <li>Publicar web <b>y reglas juntas</b>: <code>node scripts/crear-demo.js</code> y <code>firebase deploy --only hosting,firestore:rules --config firebase.demo.json --project &lt;proyecto&gt;</code>.</li></ol>
+  <div class="note err"><b>Regla fija: las reglas de Firestore SIEMPRE actualizadas.</b> <code>firestore.rules</code> del repositorio es la única fuente: nunca editarlas a mano en la consola ni publicar solo <code>hosting</code>. Cada cambio de colecciones o correos admin se publica en el mismo deploy, y se confirma con <code>python tests/test_produccion.py</code>.</div>
 </section>
 
 <!-- 6 VARIABLES -->
@@ -243,7 +243,7 @@ Las claves NO las pego en el chat: van directo a Railway.</pre>
     <tr><td>La web muestra esa hora ocupada y el panel la lista en «Próximas reservas»</td><td><span class="chip ok">OK</span></td></tr>
     <tr><td>Reglas de Firestore publicadas permiten leer <code>settings/sitio</code> («Mi horario»)</td><td><span class="chip err">Pendiente</span></td></tr>
   </table>
-  <div class="note err"><b>Hallazgo pendiente:</b> las reglas publicadas en la consola de Firebase no incluyen la regla <code>settings</code> del repositorio. La web no puede leer «Mi horario» y usa los valores base, mientras el agente (con permisos de administrador) sí lo lee: si el dueño cambia su horario en el panel, la web y el agente podrían ofrecer horas distintas. <b>Solución:</b> pegar <code>firestore.rules</code> en Firestore → Reglas → Publicar.</div>
+  <div class="note err"><b>Hallazgo pendiente:</b> las reglas publicadas en la consola de Firebase no incluyen la regla <code>settings</code> del repositorio. La web no puede leer «Mi horario» y usa los valores base, mientras el agente (con permisos de administrador) sí lo lee: si el dueño cambia su horario en el panel, la web y el agente podrían ofrecer horas distintas. <b>Solución:</b> publicar con <code>firebase deploy --only hosting,firestore:rules</code> (ya configurado en el repo de la web).</div>
   <div class="note"><b>No cubierto automáticamente:</b> el tono exacto de cada respuesta (lo genera la IA). Se valida con 3 conversaciones reales antes de entregar: pedir hora, pedir una hora ocupada, preguntar algo fuera de tema.</div>
 </section>
 
@@ -260,6 +260,7 @@ Las claves NO las pego en el chat: van directo a Railway.</pre>
     <tr><td>Railway no toma los cambios nuevos</td><td>«Redeploy» reinstala el mismo commit. Usar <b>Ctrl+K → Deploy latest commit</b> y activar despliegue automático.</td></tr>
     <tr><td>La web muestra libre una hora tomada</td><td>Caché del navegador con la versión antigua. <b>Ctrl+Shift+R</b>.</td></tr>
     <tr><td>Panel: «No se pudo conectar con la base de datos»</td><td>Correo no autorizado en <code>firestore.rules</code> o reglas sin publicar.</td></tr>
+    <tr><td>La web no lee «Mi horario» (permiso denegado)</td><td>Reglas de la consola desactualizadas. Ahora se publican siempre con <code>--only hosting,firestore:rules</code> y <code>tests/test_produccion.py</code> lo detecta.</td></tr>
     <tr><td>Panel no muestra la reserva de mañana</td><td>Solo tenía «Agenda de hoy». Se agregó «Próximas reservas».</td></tr>
     <tr><td>Git: «detected dubious ownership»</td><td>Carpeta en otro disco (D:). <code>git config --global --add safe.directory &lt;ruta&gt;</code>.</td></tr>
     <tr><td>La demo guardaba reservas solo en el navegador</td><td><code>MODO_DEMO</code> sin Firebase. <code>crear-demo.js</code> ahora usa <code>CON_FIREBASE = true</code>.</td></tr>
@@ -272,7 +273,6 @@ Las claves NO las pego en el chat: van directo a Railway.</pre>
     <li>La cuenta de servicio de Firebase tiene acceso total: guardar el archivo en un lugar seguro o borrarlo tras cargarlo.</li>
     <li>Las reservas por WhatsApp quedan con <code>consent.accepted = false</code> (el cliente no marcó la política de privacidad en la web).</li>
   </ul>
-  <p class="foot">TiforTi · Páginas web simples, rápidas y a buen precio · tiforti.cl — Guía generada con Claude Code a partir de la implementación de StudioBarber.</p>
 </section>
 
 </body>
