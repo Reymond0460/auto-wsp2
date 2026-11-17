@@ -202,45 +202,60 @@ async def webhook_handler(request: Request, tareas: BackgroundTasks):
     return {"status": "ok", "encolados": encolados}
 
 
+# Mensajes que llegaron seguidos y todavia no se contestan, por telefono.
+_pendientes: dict[str, list[MensajeEntrante]] = defaultdict(list)
+# Segundos que se espera por si el cliente manda otro mensaje enseguida
+# ("No tienes otro dia?" + "Otra hora?"): se contestan juntos, en una sola respuesta.
+ESPERA_AGRUPAR = float(os.getenv("ESPERA_AGRUPAR_SEGUNDOS") or "6")
+
+
 async def procesar_mensaje(msg: MensajeEntrante):
     """
     Genera la respuesta y la manda de vuelta. Corre fuera del ciclo del webhook.
 
-    Se toma un candado por telefono: dos mensajes seguidos del mismo cliente se
-    atienden en orden, no en paralelo, para que el historial no se mezcle.
+    Si el cliente manda varios mensajes seguidos, se espera un momento y se contestan
+    todos juntos. Ademas se toma un candado por telefono para que el historial no se mezcle.
     """
-    evento_id = msg.contexto.get("evento_id") or msg.mensaje_id
+    _pendientes[msg.telefono].append(msg)
+    await asyncio.sleep(ESPERA_AGRUPAR)
+    if not _pendientes[msg.telefono] or _pendientes[msg.telefono][-1] is not msg:
+        return  # llego otro mensaje despues: ese se encarga de contestar todos
 
     async with _candados[msg.telefono]:
+        grupo = _pendientes.pop(msg.telefono, [msg])
+        texto = "\n".join(m.texto for m in grupo)
+        eventos = [m.contexto.get("evento_id") or m.mensaje_id for m in grupo]
+
+        async def _liberar():
+            for ev in eventos:
+                await liberar_evento(ev)
+
         try:
             # El historial se lee ANTES de guardar el mensaje actual: brain.py agrega
             # el mensaje nuevo al final, y asi no queda duplicado.
             historial = await obtener_historial(msg.telefono)
-            respuesta, es_respuesta_real = await generar_respuesta(msg.texto, historial, msg.telefono)
+            respuesta, es_respuesta_real = await generar_respuesta(texto, historial, msg.telefono)
 
             enviado = await proveedor.enviar_mensaje(msg.telefono, respuesta, msg.contexto)
 
             if not enviado:
-                # El evento se marco como procesado ANTES de llegar hasta aca, para que dos
-                # entregas simultaneas no se dupliquen. Si el envio fallo, hay que soltarlo:
-                # si no, el reintento del proveedor se descartaria por duplicado y el cliente
-                # se quedaria sin respuesta para siempre.
-                logger.error(f"No se pudo enviar la respuesta a {msg.telefono}; se libera el evento")
-                await liberar_evento(evento_id)
+                # Si el envio fallo, se sueltan los eventos para que el reintento del
+                # proveedor si se procese (si no, el cliente se queda sin respuesta).
+                logger.error(f"No se pudo enviar la respuesta a {msg.telefono}; se liberan los eventos")
+                await _liberar()
                 return
 
             # Solo se guarda en el historial lo que de verdad es conversacion. Los avisos
-            # tecnicos ("estoy teniendo problemas") no son un turno del agente: guardarlos
-            # los deja contaminando el contexto de todos los mensajes que vengan despues.
+            # tecnicos ("estoy teniendo problemas") no son un turno del agente.
             if es_respuesta_real:
-                await guardar_mensaje(msg.telefono, "user", msg.texto)
+                await guardar_mensaje(msg.telefono, "user", texto)
                 await guardar_mensaje(msg.telefono, "assistant", respuesta)
 
             logger.info(f"Respuesta enviada a {msg.telefono}: {respuesta}")
 
         except Exception as e:  # noqa: BLE001
             logger.exception(f"Error procesando el mensaje de {msg.telefono}: {e}")
-            await liberar_evento(evento_id)
+            await _liberar()
             try:
                 await proveedor.enviar_mensaje(msg.telefono, obtener_mensaje_error(), msg.contexto)
             except Exception:  # noqa: BLE001
