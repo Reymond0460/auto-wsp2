@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía Automatización WhatsApp · TiforTi</title>
+<style>
+@font-face{font-family:"PJS";font-weight:400 800;src:url(data:font/woff2;base64,__FONT__) format("woff2")}
+:root{--blue:#1556d7;--bright:#0d66ec;--navy:#10203b;--deep:#092956;--muted:#66738b;--line:#e4eaf2;--soft:#f5f8fc;--pale:#eaf3ff;--ok:#16a34a;--err:#dc2626;--warn:#b45309}
+@page{size:A4;margin:16mm 15mm 18mm}
+*{box-sizing:border-box}
+body{font-family:"PJS",system-ui,sans-serif;color:var(--navy);font-size:10.3pt;line-height:1.5;margin:0;background:#fff}
+h1,h2,h3{letter-spacing:-.03em;margin:0}
+h2{font-size:19pt;font-weight:800;margin:0 0 4px;color:var(--navy)}
+h2 .n{color:var(--blue);margin-right:6px}
+h3{font-size:12pt;font-weight:700;margin:16px 0 6px}
+p{margin:6px 0}
+.lead{color:var(--muted);margin:2px 0 14px}
+section{break-before:page}
+section.nob{break-before:auto;margin-top:14px}
+.blue{color:var(--blue)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17pt;letter-spacing:-.05em}
+.brand img{width:34px;height:34px}
+/* Portada */
+.cover{height:262mm;display:flex;flex-direction:column;justify-content:space-between;break-after:page}
+.cover .hero{background:linear-gradient(135deg,var(--deep),var(--blue));color:#fff;border-radius:22px;padding:42px 38px;margin-top:40px}
+.cover .tag{display:inline-block;background:#ffffff22;border:1px solid #ffffff44;border-radius:99px;padding:4px 12px;font-size:9pt;font-weight:600}
+.cover h1{font-size:33pt;line-height:1.08;margin:18px 0 12px;font-weight:800}
+.cover .hero p{color:#dfe9ff;font-size:12pt;max-width:420px}
+.cover .meta{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.box{background:var(--soft);border:1px solid var(--line);border-radius:15px;padding:14px 16px}
+.box b{display:block;font-size:13pt}
+.box span{color:var(--muted);font-size:9pt}
+/* Componentes */
+.card{border:1px solid var(--line);border-radius:15px;padding:14px 16px;margin:10px 0;break-inside:avoid}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.s1 .card{margin:0;padding:10px 14px}.s1 .card p{margin:4px 0 0}
+.chip{display:inline-block;background:var(--pale);color:var(--blue);border-radius:99px;padding:2px 10px;font-size:8.5pt;font-weight:700}
+.chip.ok{background:#dcfce7;color:var(--ok)}.chip.err{background:#fee2e2;color:var(--err)}.chip.warn{background:#fef3c7;color:var(--warn)}
+table{width:100%;border-collapse:collapse;margin:8px 0;font-size:9.3pt;break-inside:auto}
+th{background:var(--navy);color:#fff;text-align:left;font-weight:700;padding:7px 9px}
+th:first-child{border-top-left-radius:8px}th:last-child{border-top-right-radius:8px}
+td{border-bottom:1px solid var(--line);padding:6px 9px;vertical-align:top}
+tr{break-inside:avoid}
+tr:nth-child(even) td{background:var(--soft)}
+code{font-family:ui-monospace,Consolas,monospace;font-size:8.8pt;background:var(--pale);color:var(--deep);border-radius:5px;padding:1px 5px}
+pre{font-family:ui-monospace,Consolas,monospace;font-size:8.4pt;background:var(--deep);color:#e6eeff;border-radius:12px;padding:12px 14px;white-space:pre-wrap;margin:8px 0;break-inside:avoid}
+ol,ul{padding-left:20px;margin:6px 0}li{margin:3px 0}
+.note{border-left:4px solid var(--blue);background:var(--pale);border-radius:0 12px 12px 0;padding:10px 14px;margin:10px 0;break-inside:avoid}
+.note.warn{border-color:var(--warn);background:#fffbeb}.note.err{border-color:var(--err);background:#fef2f2}
+.flow{display:flex;align-items:stretch;gap:6px;margin:12px 0}
+.flow .s{flex:1;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center;font-size:8.8pt}
+.flow .s b{display:block;font-size:10pt;color:var(--blue)}
+.flow .a{align-self:center;color:var(--blue);font-weight:800}
+.total{background:var(--navy);color:#fff;border-radius:15px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.total b{font-size:18pt}
+.chat{background:#e5ddd5;border-radius:14px;padding:9px;display:flex;flex-direction:column;gap:4px;font-size:8.6pt;line-height:1.35}
+.chat .in,.chat .out{max-width:80%;padding:4px 9px;border-radius:9px}
+.chat .in{background:#fff;align-self:flex-start}.chat .out{background:#dcf8c6;align-self:flex-end}
+.foot{font-size:8pt;color:var(--muted);margin-top:18px;border-top:1px solid var(--line);padding-top:8px}
+</style>
+</head>
+<body>
+
+<!-- PORTADA -->
+<div class="cover">
+  <div>
+    <div class="brand"><img src="data:image/png;base64,__LOGO__" alt="">TiforTi</div>
+    <div class="hero">
+      <span class="tag">Guía de implementación · Noviembre 2026</span>
+      <h1>Agente de WhatsApp con IA para reservas</h1>
+      <p>Cómo replicar en cualquier proyecto de TiforTi el asistente que responde a los clientes por WhatsApp, ofrece horas y agenda en la misma base de datos de la página web.</p>
+    </div>
+  </div>
+  <div>
+    <div class="meta">
+      <div class="box"><b>~US$6–8 / mes</b><span>costo estimado por cliente pequeño</span></div>
+      <div class="box"><b>26 / 26</b><span>pruebas automáticas de QA aprobadas</span></div>
+      <div class="box"><b>~45 min</b><span>para montarlo con esta guía</span></div>
+    </div>
+    <p class="foot">Caso base: StudioBarber (demo) · agente «Brayan» · repos <code>auto-wsp2</code> (agente) y <code>Servicio-Barber</code> (web). Documento interno de TiforTi — tiforti.cl</p>
+  </div>
+</div>
+
+<!-- 1 -->
+<section style="break-before:auto">
+  <h2><span class="n">1</span>Qué hace la automatización</h2>
+  <p class="lead">Un número de WhatsApp Business que contesta solo, 24/7, con el tono del negocio, y que reserva de verdad en la agenda de la web.</p>
+  <div class="grid2 s1">
+    <div class="card"><span class="chip">Atiende</span><p>Saluda, ofrece las <b>3 horas libres más cercanas</b> a lo que pide el cliente, revisa si una hora específica está libre y propone alternativas.</p></div>
+    <div class="card"><span class="chip">Reserva</span><p>Pide el nombre, toma la hora con el <b>mismo candado</b> que usa la web (nunca dos clientes en la misma hora) y confirma solo si quedó guardada.</p></div>
+    <div class="card"><span class="chip">Comparte agenda</span><p>Lo agendado por WhatsApp aparece ocupado en la web y en el panel de administración (con origen «WhatsApp»), y al revés.</p></div>
+    <div class="card"><span class="chip">Se mantiene en su rol</span><p>Solo habla de la atención (horas, precio, horario, pago). No inventa datos: precio, duración y horario los lee de la web.</p></div>
+  </div>
+  <h3>Así se ve una conversación real (demo StudioBarber)</h3>
+  <div class="chat">
+    <div class="in">Hola</div>
+    <div class="out">Hola bro! 💈 Sí claro, ¿te sirve mañana martes 17 a las 10:00, 11:00 o 12:00? Si no, dime a qué hora te quieres cortar y reviso ✂️</div>
+    <div class="in">Para mañana a las 12</div>
+    <div class="out">Dale bro, las 12:00 de mañana martes 17 está libre. ¿A nombre de quién la dejo? ✍️</div>
+    <div class="in">Yaritza</div>
+    <div class="out">Perfecto Yaritza! ✅ Tu hora quedó agendada para mañana martes 17 a las 12:00. Por favor sé puntual, ¡te esperamos! 💈🔥</div>
+  </div>
+
+  <section class="nob">
+  <h2><span class="n">2</span>Cómo funciona por dentro</h2>
+  <div class="flow">
+    <div class="s"><b>Cliente</b>escribe por WhatsApp</div><div class="a">→</div>
+    <div class="s"><b>Zernio</b>conecta el número y envía un webhook firmado</div><div class="a">→</div>
+    <div class="s"><b>Railway</b>agente Python (FastAPI) verifica, agrupa y procesa</div><div class="a">→</div>
+    <div class="s"><b>Claude (Anthropic)</b>entiende y decide qué herramienta usar</div><div class="a">⇄</div>
+    <div class="s"><b>Firebase</b>Firestore de la web: horario, servicios, horas ocupadas, reservas</div>
+  </div>
+  <ul>
+    <li><b>Responder primero, trabajar después:</b> el webhook contesta 200 al instante y la IA trabaja en segundo plano (Zernio reintenta hasta 7 veces si tarda más de 5 s).</li>
+    <li><b>Sin duplicados:</b> cada evento se registra; si llega dos veces, se ignora.</li>
+    <li><b>Mensajes seguidos:</b> espera 6 s y responde todo junto («¿otro día?» + «¿otra hora?» = una respuesta).</li>
+    <li><b>Memoria:</b> historial de cada cliente en PostgreSQL (Railway).</li>
+    <li><b>Herramientas de la IA:</b> <code>horas_disponibles</code>, <code>reservar_cita</code>, <code>mis_citas</code>. Cancelar lo hace el dueño desde el panel.</li>
+  </ul>
+  </section>
+</section>
+
+<!-- 3 COSTOS -->
+<section>
+  <h2><span class="n">3</span>Costos y herramientas (para presentar al cliente)</h2>
+  <p class="lead">Precios vigentes a noviembre de 2026. Confirmarlos en cada sitio antes de cotizar.</p>
+  <table>
+    <tr><th>Herramienta</th><th>Para qué</th><th>Plan / precio</th><th>¿Pago?</th></tr>
+    <tr><td><b>Anthropic (Claude API)</b><br><small>platform.claude.com</small></td><td>La IA que conversa</td><td>Prepago por uso (se cargan créditos, ej. US$5).<br><b>Haiku 5.5:</b> ~US$0,002 por conversación (≈ US$2 / 1.000).<br>Sonnet 5.5: ~US$0,04 (≈ US$44 / 1.000).<br>Opus 5.5: ~US$0,09.</td><td><span class="chip warn">Sí, por uso</span></td></tr>
+    <tr><td><b>Railway</b><br><small>railway.com</small></td><td>Servidor del agente + base PostgreSQL</td><td>Trial: US$5 una vez (30 días).<br><b>Hobby: US$5/mes</b> (incluye US$5 de uso).<br>Ojo: la base de datos cuenta como segundo servicio siempre encendido.</td><td><span class="chip warn">Sí, mensual</span></td></tr>
+    <tr><td><b>Zernio</b><br><small>zernio.com</small></td><td>Conecta el WhatsApp del cliente sin app de Facebook</td><td>Primeras 2 cuentas conectadas <b>gratis</b>, sin tarjeta.<br>Número dedicado nuevo: desde ~US$3/mes (si el cliente no usa el suyo).</td><td><span class="chip ok">Gratis*</span></td></tr>
+    <tr><td><b>Meta (WhatsApp Cloud API)</b></td><td>Cobro de Meta por mensajes</td><td>Desde el 1-oct-2026 se cobra por mensaje de servicio entregado; <b>los primeros 1.000 al mes por número son gratis</b>. Las plantillas (escribir primero) se cobran aparte por país.</td><td><span class="chip ok">Gratis hasta 1.000</span></td></tr>
+    <tr><td><b>Firebase (Firestore + Hosting)</b></td><td>Web, panel y agenda compartida</td><td>Plan Spark gratuito (cuotas diarias amplias para un negocio pequeño).</td><td><span class="chip ok">Gratis</span></td></tr>
+    <tr><td><b>GitHub</b></td><td>Código de agente y web</td><td>Repositorios privados gratis.</td><td><span class="chip ok">Gratis</span></td></tr>
+  </table>
+  <div class="total"><div>Costo mensual estimado · negocio pequeño (≤300 conversaciones/mes, Haiku)<br><small style="color:#c9d6f0">Railway Hobby US$5 + Anthropic ~US$1–3 + Zernio/Meta/Firebase US$0</small></div><b>US$6–8</b></div>
+  <div class="note"><b>Cómo bajar el costo:</b> lo que más pesa es el texto que se envía a la IA en cada mensaje (instrucciones + historial). Quitar del prompt lo que los clientes no preguntan rinde más que cambiar de modelo. Configurar un <b>límite de gasto mensual</b> en Anthropic (Settings → Limits).</div>
+  <div class="note warn"><b>Meta «pago bloqueado»:</b> si la cuenta de WhatsApp no tiene método de pago, Meta bloquea solo las conversaciones que inicia el negocio. El agente responde a quien escribe, así que funciona igual.</div>
+</section>
+
+<!-- 4 DATOS -->
+<section>
+  <h2><span class="n">4</span>Qué necesito para un proyecto nuevo</h2>
+  <p class="lead">Completa esta ficha y pásamela junto con este PDF: con eso configuramos todo en una sola sesión.</p>
+  <table>
+    <tr><th style="width:36%">Dato</th><th>Ejemplo (StudioBarber)</th></tr>
+    <tr><td>Nombre del negocio y rubro</td><td>StudioBarber · barbería en Santiago</td></tr>
+    <tr><td>Qué debe hacer el agente</td><td>Ofrecer horas cercanas, agendar, responder solo temas de atención</td></tr>
+    <tr><td>Nombre del agente y tono</td><td>«Brayan», amigable chileno, trata de «bro», con emojis 💈✂️</td></tr>
+    <tr><td>Mensajes clave textuales</td><td>Saludo, «hora tomada», confirmación «sé puntual, ¡te esperamos!»</td></tr>
+    <tr><td>Servicios, precios, duración, horario</td><td>Se leen de la web (Firestore). Si no hay web: lista manual</td></tr>
+    <tr><td>Número de WhatsApp (con app Business)</td><td>+56 9 XXXX XXXX (modo coexistencia)</td></tr>
+    <tr><td>Números permitidos para la demo</td><td>Solo los celulares de prueba (<code>NUMEROS_PERMITIDOS</code>)</td></tr>
+    <tr><td>Repositorio de la web y proyecto Firebase</td><td><code>Reymond0460/Servicio-Barber</code> · <code>barber-diego</code></td></tr>
+    <tr><td>Correo admin del panel</td><td>Debe estar en <code>firestore.rules</code> y en Authentication</td></tr>
+    <tr><td>Modelo de IA</td><td>Haiku (barato) · Sonnet (default) · Opus (complejo)</td></tr>
+  </table>
+  <h3>Prompt para empezar conmigo (copiar y pegar)</h3>
+  <pre>Quiero replicar la automatización de WhatsApp de TiforTi (te adjunto la guía PDF).
+Proyecto: [NOMBRE] · rubro: [RUBRO] · web: [URL] · repo web: [OWNER/REPO]
+Agente: [NOMBRE], tono [TONO]. Mensajes clave: [TEXTOS].
+Base: copiar el agente de Reymond0460/auto-wsp2 en un repo/rama nuevo,
+adaptar prompts.yaml y agenda_web.py a las colecciones de la web,
+correr tests/test_qa.py y guiarme en Zernio, Railway y Firebase.
+Las claves NO las pego en el chat: van directo a Railway.</pre>
+</section>
+
+<!-- 5 PASO A PASO -->
+<section>
+  <h2><span class="n">5</span>Paso a paso de la puesta en marcha</h2>
+  <p class="lead">Orden recomendado. Lo marcado con 👤 lo hace el dueño de las cuentas; lo demás lo hace Claude.</p>
+  <h3>A · Código (Claude)</h3>
+  <ol>
+    <li>Copiar <code>auto-wsp2</code> (agente) y crear la rama de trabajo.</li>
+    <li>Escribir <code>config/prompts.yaml</code> con identidad, tono y mensajes clave; ajustar <code>config/business.yaml</code>.</li>
+    <li>Si la web tiene otra estructura de datos, adaptar <code>agent/agenda_web.py</code> (copia las reglas de <code>js/data.js</code>).</li>
+    <li>En la web: <code>scripts/crear-demo.js</code> con <code>CON_FIREBASE = true</code> y la sección «Próximas reservas» del panel.</li>
+    <li>Correr <code>python tests/test_qa.py</code> (debe dar 26/26).</li>
+  </ol>
+  <h3>B · Anthropic 👤</h3>
+  <ol><li>platform.claude.com → Settings → API Keys → Crear clave → opción «En otro lugar».</li>
+  <li>Sin vencimiento (o el plazo más largo). Copiarla una sola vez. Poner límite de gasto.</li></ol>
+  <h3>C · Zernio 👤</h3>
+  <ol><li>Crear cuenta → Connections → WhatsApp → Embedded Signup con el número del negocio (coexistencia: la app Business sigue funcionando).</li>
+  <li>Settings → API Keys → crear clave <code>sk_…</code>. Inventar un <i>webhook secret</i> distinto de la API key.</li>
+  <li>Claude obtiene el <code>ZERNIO_ACCOUNT_ID</code> y revisa el estado del número.</li></ol>
+  <h3>D · Railway 👤</h3>
+  <ol><li>New Project → <b>Deploy from GitHub repo</b> → elegir repo y rama.</li>
+  <li>New → Database → <b>Add PostgreSQL</b>.</li>
+  <li>Variables <b>en el servicio del agente</b> (no en Postgres) — ver tabla siguiente.</li>
+  <li>Settings → Networking → <b>Generate Domain</b>. Abrir la URL: debe decir <code>"status":"ok"</code> y <code>"agenda":{"ok":true}</code>.</li></ol>
+  <h3>E · Webhook y Firebase 👤</h3>
+  <ol><li>Zernio → Webhooks → URL <code>https://&lt;app&gt;.up.railway.app/webhook</code>, mismo secret, evento <code>message.received</code>.</li>
+  <li>Firebase → Configuración → Cuentas de servicio → <b>Generar clave privada</b> → pegar el JSON completo en <code>FIREBASE_CREDENCIALES</code>.</li>
+  <li>Firestore → Reglas: pegar <code>firestore.rules</code> del repo y <b>Publicar</b> (incluye <code>settings</code> y los correos admin).</li>
+  <li>Publicar la web: <code>node scripts/crear-demo.js</code> y <code>firebase deploy --only hosting --config firebase.demo.json --project &lt;proyecto&gt;</code>.</li></ol>
+</section>
+
+<!-- 6 VARIABLES -->
+<section>
+  <h2><span class="n">6</span>Variables de entorno (Railway)</h2>
+  <p class="lead">Todas en el servicio del agente. Nunca se suben a GitHub ni se pegan en el chat.</p>
+  <table>
+    <tr><th>Variable</th><th>Valor</th><th>Nota</th></tr>
+    <tr><td><code>ANTHROPIC_API_KEY</code></td><td><code>sk-ant-…</code></td><td>Secreta</td></tr>
+    <tr><td><code>ANTHROPIC_MODEL</code></td><td><code>claude-haiku-5-5</code></td><td>o sonnet / opus</td></tr>
+    <tr><td><code>WHATSAPP_PROVIDER</code></td><td><code>zernio</code></td><td></td></tr>
+    <tr><td><code>ZERNIO_API_KEY</code></td><td><code>sk_…</code></td><td>Secreta</td></tr>
+    <tr><td><code>ZERNIO_WEBHOOK_SECRET</code></td><td>texto inventado</td><td>El mismo en el webhook de Zernio</td></tr>
+    <tr><td><code>ZERNIO_ACCOUNT_ID</code></td><td>id de la cuenta</td><td>Lo obtiene Claude</td></tr>
+    <tr><td><code>ENVIRONMENT</code></td><td><code>production</code></td><td></td></tr>
+    <tr><td><code>DATABASE_URL</code></td><td><code>${{Postgres.DATABASE_URL}}</code></td><td>Literal, con llaves dobles</td></tr>
+    <tr><td><code>FIREBASE_CREDENCIALES</code></td><td>JSON de la cuenta de servicio</td><td>Secreta · activa la agenda compartida</td></tr>
+    <tr><td><code>NUMEROS_PERMITIDOS</code></td><td><code>+569…, +569…</code></td><td>Demo: solo responde a estos</td></tr>
+    <tr><td><code>NUMEROS_IGNORADOS</code></td><td><code>+569…</code></td><td>Opcional: nunca responder</td></tr>
+    <tr><td><code>ESPERA_AGRUPAR_SEGUNDOS</code></td><td><code>6</code></td><td>Opcional</td></tr>
+    <tr><td><code>PORT</code></td><td>—</td><td><b>No agregar</b>: Railway lo asigna</td></tr>
+  </table>
+</section>
+
+<!-- 7 QA -->
+<section>
+  <h2><span class="n">7</span>Resultado del QA (StudioBarber)</h2>
+  <p class="lead">Pruebas ejecutadas el 17-nov-2026 sobre el código y sobre producción.</p>
+  <h3>Pruebas automáticas · <span class="chip ok">26 / 26 OK</span></h3>
+  <table>
+    <tr><th>Área</th><th>Qué se comprobó</th><th>Resultado</th></tr>
+    <tr><td>Seguridad del webhook</td><td>Sin firma, firma falsa y firma con caracteres raros → 401 (sin caídas); firmado → 200</td><td><span class="chip ok">4/4</span></td></tr>
+    <tr><td>Robustez</td><td>Eventos repetidos, mensajes propios, eventos que no son mensajes, payload roto</td><td><span class="chip ok">4/4</span></td></tr>
+    <tr><td>Modo demo</td><td>Número no permitido se ignora</td><td><span class="chip ok">1/1</span></td></tr>
+    <tr><td>Conversación</td><td>Mensajes seguidos → una respuesta; uso de herramientas; fecha actual al modelo; falla de la IA → aviso sin ensuciar el historial</td><td><span class="chip ok">4/4</span></td></tr>
+    <tr><td>Agenda</td><td>Reserva válida, doble reserva rechazada, fuera de horario, fecha pasada, hora tomada no se ofrece</td><td><span class="chip ok">5/5</span></td></tr>
+    <tr><td>Paridad con la web</td><td>Bloques, domingo cerrado, pausa de almuerzo, días libres, choque de horas vecinas, formato de teléfono</td><td><span class="chip ok">6/6</span></td></tr>
+    <tr><td>Salud</td><td>Endpoint <code>/</code> informa WhatsApp y agenda</td><td><span class="chip ok">2/2</span></td></tr>
+  </table>
+  <h3>Pruebas en producción</h3>
+  <table>
+    <tr><th>Prueba</th><th>Resultado</th></tr>
+    <tr><td>Agente en Railway: WhatsApp conectado (calidad GREEN) y Firestore conectado</td><td><span class="chip ok">OK</span></td></tr>
+    <tr><td>Webhook público rechaza peticiones sin firma o con firma falsa (401)</td><td><span class="chip ok">OK</span></td></tr>
+    <tr><td>Webhook registrado en Zernio con secret y evento <code>message.received</code></td><td><span class="chip ok">OK</span></td></tr>
+    <tr><td>Horario calculado por el agente = horario de la web (JavaScript real), 21 días</td><td><span class="chip ok">21/21</span></td></tr>
+    <tr><td>Reserva real por WhatsApp (Yaritza, 17-nov 12:00) guardada en Firestore</td><td><span class="chip ok">OK</span></td></tr>
+    <tr><td>La web muestra esa hora ocupada y el panel la lista en «Próximas reservas»</td><td><span class="chip ok">OK</span></td></tr>
+    <tr><td>Reglas de Firestore publicadas permiten leer <code>settings/sitio</code> («Mi horario»)</td><td><span class="chip err">Pendiente</span></td></tr>
+  </table>
+  <div class="note err"><b>Hallazgo pendiente:</b> las reglas publicadas en la consola de Firebase no incluyen la regla <code>settings</code> del repositorio. La web no puede leer «Mi horario» y usa los valores base, mientras el agente (con permisos de administrador) sí lo lee: si el dueño cambia su horario en el panel, la web y el agente podrían ofrecer horas distintas. <b>Solución:</b> pegar <code>firestore.rules</code> en Firestore → Reglas → Publicar.</div>
+  <div class="note"><b>No cubierto automáticamente:</b> el tono exacto de cada respuesta (lo genera la IA). Se valida con 3 conversaciones reales antes de entregar: pedir hora, pedir una hora ocupada, preguntar algo fuera de tema.</div>
+</section>
+
+<!-- 8 PROBLEMAS -->
+<section>
+  <h2><span class="n">8</span>Problemas que ya resolvimos (y cómo evitarlos)</h2>
+  <table>
+    <tr><th style="width:34%">Síntoma</th><th>Causa y solución</th></tr>
+    <tr><td>El agente le responde a todos (familia, pareja)</td><td>El número es personal (coexistencia). Usar <code>NUMEROS_PERMITIDOS</code> en demos.</td></tr>
+    <tr><td>Habla con voseo («decime», «tenés»)</td><td>Indicar en el prompt el país y prohibir el voseo.</td></tr>
+    <tr><td>Dos respuestas que se contradicen</td><td>El cliente mandó 2 mensajes seguidos. Ya se agrupan (6 s).</td></tr>
+    <tr><td>Repite «bro», precio y duración en cada mensaje</td><td>Reglas de estilo en el prompt: no repetir datos ya dichos; emojis con moderación.</td></tr>
+    <tr><td>Variables con aviso «Database configuration change»</td><td>Se agregaron al servicio Postgres. Van en el servicio del agente.</td></tr>
+    <tr><td>Railway no toma los cambios nuevos</td><td>«Redeploy» reinstala el mismo commit. Usar <b>Ctrl+K → Deploy latest commit</b> y activar despliegue automático.</td></tr>
+    <tr><td>La web muestra libre una hora tomada</td><td>Caché del navegador con la versión antigua. <b>Ctrl+Shift+R</b>.</td></tr>
+    <tr><td>Panel: «No se pudo conectar con la base de datos»</td><td>Correo no autorizado en <code>firestore.rules</code> o reglas sin publicar.</td></tr>
+    <tr><td>Panel no muestra la reserva de mañana</td><td>Solo tenía «Agenda de hoy». Se agregó «Próximas reservas».</td></tr>
+    <tr><td>Git: «detected dubious ownership»</td><td>Carpeta en otro disco (D:). <code>git config --global --add safe.directory &lt;ruta&gt;</code>.</td></tr>
+    <tr><td>La demo guardaba reservas solo en el navegador</td><td><code>MODO_DEMO</code> sin Firebase. <code>crear-demo.js</code> ahora usa <code>CON_FIREBASE = true</code>.</td></tr>
+    <tr><td>Clave de API escrita en un chat de WhatsApp</td><td>Borrarla y rotarla. Las claves solo viven en Railway.</td></tr>
+  </table>
+  <h3>Seguridad</h3>
+  <ul>
+    <li>Las claves (Anthropic, Zernio, cuenta de servicio de Firebase) solo van en Railway. Nunca en GitHub, en el chat ni en WhatsApp.</li>
+    <li>El webhook verifica la firma HMAC de Zernio: sin el secret nadie puede inyectar mensajes.</li>
+    <li>La cuenta de servicio de Firebase tiene acceso total: guardar el archivo en un lugar seguro o borrarlo tras cargarlo.</li>
+    <li>Las reservas por WhatsApp quedan con <code>consent.accepted = false</code> (el cliente no marcó la política de privacidad en la web).</li>
+  </ul>
+  <p class="foot">TiforTi · Páginas web simples, rápidas y a buen precio · tiforti.cl — Guía generada con Claude Code a partir de la implementación de StudioBarber.</p>
+</section>
+
+</body>
+</html>
