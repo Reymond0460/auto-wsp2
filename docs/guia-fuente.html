@@ -197,7 +197,7 @@ Las claves NO las pego en el chat: van directo a Railway.</pre>
   <h3>E · Webhook y Firebase 👤</h3>
   <ol><li>Zernio → Webhooks → URL <code>https://&lt;app&gt;.up.railway.app/webhook</code>, mismo secret, evento <code>message.received</code>.</li>
   <li>Firebase → Configuración → Cuentas de servicio → <b>Generar clave privada</b> → pegar el JSON completo en <code>FIREBASE_CREDENCIALES</code>.</li>
-  <li>Publicar web <b>y reglas juntas</b>: <code>node scripts/crear-demo.js</code> y <code>firebase deploy --only hosting,firestore:rules --config firebase.demo.json --project &lt;proyecto&gt;</code>.</li></ol>
+  <li>Publicar web <b>y reglas juntas</b>: <code>node scripts/crear-demo.js</code> y <code>firebase deploy --only "hosting,firestore:rules" --config firebase.demo.json --project &lt;proyecto&gt;</code>.</li></ol>
   <div class="note err"><b>Regla fija: las reglas de Firestore SIEMPRE actualizadas.</b> <code>firestore.rules</code> del repositorio es la única fuente: nunca editarlas a mano en la consola ni publicar solo <code>hosting</code>. Cada cambio de colecciones o correos admin se publica en el mismo deploy, y se confirma con <code>python tests/test_produccion.py</code>.</div>
 </section>
 
@@ -247,9 +247,9 @@ Las claves NO las pego en el chat: van directo a Railway.</pre>
     <tr><td>Horario calculado por el agente = horario de la web (JavaScript real), 21 días</td><td><span class="chip ok">21/21</span></td></tr>
     <tr><td>Reserva real por WhatsApp (Yaritza, 17-nov 12:00) guardada en Firestore</td><td><span class="chip ok">OK</span></td></tr>
     <tr><td>La web muestra esa hora ocupada y el panel la lista en «Próximas reservas»</td><td><span class="chip ok">OK</span></td></tr>
-    <tr><td>Reglas de Firestore publicadas permiten leer <code>settings/sitio</code> («Mi horario»)</td><td><span class="chip err">Pendiente</span></td></tr>
+    <tr><td>Reglas de Firestore publicadas permiten leer <code>settings/sitio</code> («Mi horario»)</td><td><span class="chip ok">OK</span></td></tr>
   </table>
-  <div class="note err"><b>Hallazgo pendiente:</b> las reglas publicadas en la consola de Firebase no incluyen la regla <code>settings</code> del repositorio. La web no puede leer «Mi horario» y usa los valores base, mientras el agente (con permisos de administrador) sí lo lee: si el dueño cambia su horario en el panel, la web y el agente podrían ofrecer horas distintas. <b>Solución:</b> publicar con <code>firebase deploy --only hosting,firestore:rules</code> (ya configurado en el repo de la web).</div>
+  <div class="note"><b>Hallazgo resuelto:</b> las reglas publicadas en la consola estaban desactualizadas (la web no podía leer «Mi horario»). Se corrigió publicándolas con <code>firebase deploy --only "hosting,firestore:rules"</code> y ahora <code>tests/test_produccion.py</code> lo verifica en cada entrega (8/8 OK). En PowerShell, poner <code>hosting,firestore:rules</code> entre comillas.</div>
   <div class="note"><b>No cubierto automáticamente:</b> el tono exacto de cada respuesta (lo genera la IA). Se valida con 3 conversaciones reales antes de entregar: pedir hora, pedir una hora ocupada, preguntar algo fuera de tema.</div>
 </section>
 
