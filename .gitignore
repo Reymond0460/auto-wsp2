@@ -27,3 +27,4 @@ node_modules/
 knowledge/*
 !knowledge/.gitkeep
 config/session.yaml
+qa_resultados.json
